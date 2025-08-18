@@ -1,0 +1,11 @@
+﻿  NetworkManager.cpp
+  RoomManager.cpp
+  MainServerSide.cpp
+  Utils.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 648 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  ServerSide.vcxproj -> C:\Users\xoidr\Desktop\NewGrowtopia\x64\Release\ServerSide.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

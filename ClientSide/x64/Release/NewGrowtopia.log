@@ -1,0 +1,5 @@
+﻿  ClientSide.cpp
+C:\Users\xoidr\Desktop\NewGrowtopia\ClientSide.cpp(99,27): error C4576: a parenthesized type followed by an initializer list is a non-standard explicit type conversion syntax
+C:\Users\xoidr\Desktop\NewGrowtopia\ClientSide.cpp(99,17): error C3861: 'GuiButton': identifier not found
+C:\Users\xoidr\Desktop\NewGrowtopia\ClientSide.cpp(107,27): error C4576: a parenthesized type followed by an initializer list is a non-standard explicit type conversion syntax
+C:\Users\xoidr\Desktop\NewGrowtopia\ClientSide.cpp(107,17): error C3861: 'GuiButton': identifier not found

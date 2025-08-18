@@ -19,10 +19,10 @@ Open **CMD** and run:
 ```
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
-.ootstrap-vcpkg.bat
-.cpkg integrate install
-.cpkg install raylib:x64-windows
-.cpkg install enet:x64-windows
+.bootstrap-vcpkg.bat
+.vcpkg integrate install
+.vcpkg install raylib:x64-windows
+.vcpkg install enet:x64-windows
 ```
 
 ### 3. Configure in Visual Studio

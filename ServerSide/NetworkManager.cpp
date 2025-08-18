@@ -1,4 +1,5 @@
 ﻿#include "NetworkManager.h"
+#include "SecurityManager.h"
 #include "Utils.h"
 #include <iostream>
 #include <sstream>
@@ -40,7 +41,18 @@ void NetworkManager::Run() {
 }
 
 void NetworkManager::HandleConnect(ENetEvent& ev) {
-    std::cout << "Client connected.\n";
+    auto& security = SecurityManager::getInstance();
+    if (security.isBlacklisted(GetIPFromPeer(ev.peer))) {
+        std::cout << "[SECURITY] Blocked connection from " << GetIPFromPeer(ev.peer) << std::endl;
+        security.logToFile("[SECURITY] Blocked connection from " + GetIPFromPeer(ev.peer));
+        enet_peer_disconnect_now(ev.peer, 0);
+        return;
+    }
+    security.recordConnectAttempt(GetIPFromPeer(ev.peer));
+
+    std::cout << "[INFO] Client connected from " << GetIPFromPeer(ev.peer) << "\n";
+    security.logToFile("[INFO] Client connected from " + GetIPFromPeer(ev.peer));
+
     connectedClients++;
 
     std::string msg = "ONLINE|" + std::to_string(connectedClients);
@@ -50,8 +62,16 @@ void NetworkManager::HandleConnect(ENetEvent& ev) {
 }
 
 void NetworkManager::HandleReceive(ENetEvent& ev) {
+    if (ev.packet->dataLength > 1024) {
+        auto& security = SecurityManager::getInstance();
+        std::cout << "[SECURITY] Oversized packet from client from " + GetIPFromPeer(ev.peer) + "\n";
+        security.logToFile("[SECURITY] Oversized packet from client from " + GetIPFromPeer(ev.peer));
+        enet_packet_destroy(ev.packet);
+        return;
+    }
+
     std::string msg((char*)ev.packet->data, ev.packet->dataLength);
-    enet_packet_destroy(ev.packet);
+    enet_packet_destroy(ev.packet); // ✅ leak yok
 
     if (msg == "GETROOMS") {
         roomManager.SendRoomList(ev.peer);
@@ -144,7 +164,8 @@ void NetworkManager::HandleReceive(ENetEvent& ev) {
 }
 
 void NetworkManager::HandleDisconnect(ENetEvent& ev) {
-    std::cout << "Client disconnected.\n";
+    std::cout << "[INFO] Client disconnected: " << GetIPFromPeer(ev.peer) << "\n";
+    SecurityManager::getInstance().logToFile("[INFO] Client disconnected: " + GetIPFromPeer(ev.peer));
     connectedClients--;
 
     std::string msg = "ONLINE|" + std::to_string(connectedClients);
@@ -152,10 +173,13 @@ void NetworkManager::HandleDisconnect(ENetEvent& ev) {
     enet_host_broadcast(server, 0, p);
     enet_host_flush(server);
 
-    if (roomManager.peerToRoom.find(ev.peer) != roomManager.peerToRoom.end()) {
-        int roomId = roomManager.peerToRoom[ev.peer];
-        if (roomManager.rooms.find(roomId) != roomManager.rooms.end()) {
-            Room& room = roomManager.rooms[roomId];
+    auto it = roomManager.peerToRoom.find(ev.peer);
+    if (it != roomManager.peerToRoom.end()) {
+        int roomId = it->second;
+
+        auto roomIt = roomManager.rooms.find(roomId);
+        if (roomIt != roomManager.rooms.end()) {
+            Room& room = roomIt->second;
 
             if (!room.players.empty() && room.players.begin()->first == ev.peer) {
                 for (auto& kv : room.players) {
@@ -164,6 +188,7 @@ void NetworkManager::HandleDisconnect(ENetEvent& ev) {
                         ENetPacket* p = enet_packet_create(err.c_str(), err.size(), ENET_PACKET_FLAG_RELIABLE);
                         enet_peer_send(kv.first, 0, p);
                         enet_host_flush(server);
+
                         roomManager.peerToRoom.erase(kv.first);
                     }
                 }

@@ -7,6 +7,6 @@
   Previous IPDB not found, fall back to full compilation.
   All 271 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
-  ClientSide.vcxproj -> C:\Users\xoidr\Desktop\NewGrowtopia\x64\Release\ClientSide.exe
+  ClientSide.vcxproj -> C:\Users\xoidr\Desktop\SquareFighters2D\x64\Release\ClientSide.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.

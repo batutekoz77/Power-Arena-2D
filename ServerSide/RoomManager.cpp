@@ -1,7 +1,8 @@
-#include "RoomManager.h"
+﻿#include "RoomManager.h"
 #include <vector>
 #include <cstring>
 #include <iostream>
+#include <algorithm>
 
 void RoomManager::SendRoomList(ENetPeer* peer) {
     std::string msg = "ROOMLIST|";
@@ -13,18 +14,37 @@ void RoomManager::SendRoomList(ENetPeer* peer) {
     enet_peer_send(peer, 0, p);
 }
 
-void RoomManager::BroadcastRoomState(int roomId) {
+void RoomManager::BroadcastRoomState(int roomId, bool everyone) {
     if (rooms.find(roomId) == rooms.end()) return;
     auto& room = rooms[roomId];
 
     std::vector<PlayerState> buf;
-    for (auto& [peer, pl] : room.players) {
-        PlayerState ps;
-        ps.posX = pl.posX;
-        ps.posY = pl.posY;
-        strncpy_s(ps.name, pl.name.c_str(), sizeof(ps.name));
-        strncpy_s(ps.ip, pl.ip.c_str(), sizeof(ps.ip));
-        buf.push_back(ps);
+
+    if (everyone) {
+        for (auto& [peer, pl] : room.players) {
+            pl.posX = 900.f / 2.f;
+            pl.posY = 650.f / 2.f;
+
+            PlayerState ps;
+            ps.posX = pl.posX;
+            ps.posY = pl.posY;
+            strncpy_s(ps.name, pl.name.c_str(), sizeof(ps.name));
+            strncpy_s(ps.ip, pl.ip.c_str(), sizeof(ps.ip));
+            buf.push_back(ps);
+        }
+
+        // todo: after respawn player needs to be ghost for 3 seconds 
+        // (color will be grey and noone will be able to shoot him
+    }
+    else {
+        for (auto& [peer, pl] : room.players) {
+            PlayerState ps;
+            ps.posX = pl.posX;
+            ps.posY = pl.posY;
+            strncpy_s(ps.name, pl.name.c_str(), sizeof(ps.name));
+            strncpy_s(ps.ip, pl.ip.c_str(), sizeof(ps.ip));
+            buf.push_back(ps);
+        }
     }
 
     size_t size = buf.size() * sizeof(PlayerState);

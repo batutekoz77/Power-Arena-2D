@@ -18,7 +18,7 @@ Then, each player selects one of four powers:
 1. **Extra Speed (Blue)** – Permanently increases movement speed  
 2. **Extra Ammo (Orange)** – Expands ammo capacity beyond the default  
 3. **Time Developer (Purple)** – Reduces cooldowns for faster ability usage  
-4. **Freezer (Green)** – Freezes all enemies for 1.5 seconds  
+4. **Freezer (Yellow)** – Freezes all enemies for 1.5 seconds  
 
 ## Getting Started
 

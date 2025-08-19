@@ -28,6 +28,8 @@ void RoomManager::BroadcastRoomState(int roomId, bool everyone) {
             PlayerState ps;
             ps.posX = pl.posX;
             ps.posY = pl.posY;
+            ps.ghost = true;
+            ps.power = pl.power;
             strncpy_s(ps.name, pl.name.c_str(), sizeof(ps.name));
             strncpy_s(ps.ip, pl.ip.c_str(), sizeof(ps.ip));
             buf.push_back(ps);
@@ -41,6 +43,8 @@ void RoomManager::BroadcastRoomState(int roomId, bool everyone) {
             PlayerState ps;
             ps.posX = pl.posX;
             ps.posY = pl.posY;
+            ps.ghost = pl.ghost;
+            ps.power = pl.power;
             strncpy_s(ps.name, pl.name.c_str(), sizeof(ps.name));
             strncpy_s(ps.ip, pl.ip.c_str(), sizeof(ps.ip));
             buf.push_back(ps);

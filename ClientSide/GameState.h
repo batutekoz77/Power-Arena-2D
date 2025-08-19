@@ -7,6 +7,8 @@ struct PlayerState {
     float posX, posY;
     char ip[32];
     char name[32];
+    int power;
+    bool ghost;
 };
 #pragma pack(pop)
 

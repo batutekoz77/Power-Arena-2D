@@ -14,7 +14,7 @@ struct PlayerState {
 class RoomManager {
 public:
     void SendRoomList(ENetPeer* peer);
-    void BroadcastRoomState(int roomId);
+    void BroadcastRoomState(int roomId, bool everyone);
 
     std::map<int, Room> rooms;
     std::map<ENetPeer*, int> peerToRoom;

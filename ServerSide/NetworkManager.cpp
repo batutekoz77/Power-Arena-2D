@@ -71,7 +71,7 @@ void NetworkManager::HandleReceive(ENetEvent& ev) {
     }
 
     std::string msg((char*)ev.packet->data, ev.packet->dataLength);
-    enet_packet_destroy(ev.packet); // ✅ leak yok
+    enet_packet_destroy(ev.packet);
 
     if (msg == "GETROOMS") {
         roomManager.SendRoomList(ev.peer);
@@ -103,50 +103,43 @@ void NetworkManager::HandleReceive(ENetEvent& ev) {
             p.ip = ipStr;
 
             room.players[ev.peer] = p;
+
             roomManager.rooms[roomManager.nextRoomId] = room;
             roomManager.peerToRoom[ev.peer] = roomManager.nextRoomId;
 
             std::cout << "Room created: " << room.name << " (id " << roomManager.nextRoomId << ")\n";
-            roomManager.BroadcastRoomState(roomManager.peerToRoom[ev.peer]);
+            roomManager.BroadcastRoomState(roomManager.peerToRoom[ev.peer], true);
             roomManager.nextRoomId++;
         }
     }
-    else if (msg.rfind("JOIN ", 0) == 0) {
-        std::istringstream iss(msg.substr(5));
-        int roomId;
-        std::string playerName;
-        iss >> roomId >> playerName;
-
-        if (roomManager.rooms.find(roomId) == roomManager.rooms.end()) {
-            std::string err = "ERROR Room not found!";
-            ENetPacket* p = enet_packet_create(err.c_str(), err.size(), ENET_PACKET_FLAG_RELIABLE);
-            enet_peer_send(ev.peer, 0, p);
-            enet_host_flush(server);
-            return;
-        }
-
-        Room& r = roomManager.rooms[roomId];
-
-        // isim kontrolü
-        for (auto& kv : r.players) {
-            if (kv.second.name == playerName) {
-                std::string err = "ERROR Name already taken in this room!";
+    else if (msg.rfind("JOIN ", 0) == 0) { 
+        std::istringstream iss(msg.substr(5)); 
+        int roomId; 
+        std::string playerName; 
+        iss >> roomId >> playerName; 
+        if (roomManager.rooms.find(roomId) == roomManager.rooms.end()) { 
+            std::string err = "ERROR Room not found!"; 
+            ENetPacket* p = enet_packet_create(err.c_str(), err.size(), ENET_PACKET_FLAG_RELIABLE); 
+            enet_peer_send(ev.peer, 0, p); 
+            enet_host_flush(server); 
+            return; 
+        } Room& r = roomManager.rooms[roomId]; 
+        for (auto& kv : r.players) { 
+            if (kv.second.name == playerName) { 
+                std::string err = "ERROR Name already taken in this room!"; 
                 ENetPacket* p = enet_packet_create(err.c_str(), err.size(), ENET_PACKET_FLAG_RELIABLE);
                 enet_peer_send(ev.peer, 0, p);
                 enet_host_flush(server);
-                return;
-            }
-        }
-
-        Player p;
-        p.name = playerName;
-        p.ip = GetIPFromPeer(ev.peer);
-
-        r.players[ev.peer] = p;
-        roomManager.peerToRoom[ev.peer] = roomId;
-
-        std::cout << "Player " << playerName << " joined room " << r.name << "\n";
-        roomManager.BroadcastRoomState(roomId);
+                return; 
+            } 
+        } Player p; 
+        p.name = playerName; 
+        p.ip = GetIPFromPeer(ev.peer); 
+        r.players[ev.peer] = p; 
+        roomManager.peerToRoom[ev.peer] = roomId; 
+        
+        std::cout << "Player " << playerName << " joined room " << r.name << "\n"; 
+        roomManager.BroadcastRoomState(roomId, true); 
     }
     else if (msg == "W" || msg == "A" || msg == "S" || msg == "D") {
         if (roomManager.peerToRoom.find(ev.peer) != roomManager.peerToRoom.end()) {
@@ -158,7 +151,17 @@ void NetworkManager::HandleReceive(ENetEvent& ev) {
             if (msg == "A") player.posX -= 4;
             if (msg == "D") player.posX += 4;
 
-            roomManager.BroadcastRoomState(roomId);
+            float minX = 0.f;
+            float maxX = 900.f - 40.f;
+            float minY = 0.f;
+            float maxY = 650.f - 40.f;
+
+            if (player.posX < minX) player.posX = minX;
+            if (player.posX > maxX) player.posX = maxX;
+            if (player.posY < minY) player.posY = minY;
+            if (player.posY > maxY) player.posY = maxY;
+
+            roomManager.BroadcastRoomState(roomId, false);
         }
     }
 }
@@ -196,8 +199,10 @@ void NetworkManager::HandleDisconnect(ENetEvent& ev) {
             }
             else {
                 room.players.erase(ev.peer);
-                if (room.players.empty()) roomManager.rooms.erase(roomId);
-                else roomManager.BroadcastRoomState(roomId);
+                if (room.players.empty()) {
+                    roomManager.rooms.erase(roomId);
+                }
+                else roomManager.BroadcastRoomState(roomId, false);
             }
         }
         roomManager.peerToRoom.erase(ev.peer);

@@ -3,10 +3,22 @@ A fast-paced 2D multiplayer battle game built in C++ with ENet & Raylib.
 
 ## Features
 - Create or join rooms and battle friends in real-time  
-- Each player chooses a unique superpower  
+- **Choose from unique super powers at the start of each match**  
 - Smooth networking powered by ENet  
 - Lightweight 2D engine-free design with Raylib  
 - Cross-platform potential  
+
+## Super Powers
+At the beginning of each match, players start in **Ghost Mode**:  
+- Shown as **light gray** squares with no name tag  
+- Cannot move until a super power is selected  
+
+Then, each player selects one of four powers:
+
+1. **Extra Speed (Blue)** – Permanently increases movement speed  
+2. **Extra Ammo (Orange)** – Expands ammo capacity beyond the default  
+3. **Time Developer (Purple)** – Reduces cooldowns for faster ability usage  
+4. **Freezer (Green)** – Freezes all enemies for 1.5 seconds  
 
 ## Getting Started
 

@@ -1,11 +1,15 @@
 ﻿  GameState.cpp
   MainClientSide.cpp
+C:\Users\xoidr\Desktop\SquareFighters2D\ClientSide\MainClientSide.cpp(128,57): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\xoidr\Desktop\SquareFighters2D\ClientSide\MainClientSide.cpp(128,44): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\xoidr\Desktop\SquareFighters2D\ClientSide\MainClientSide.cpp(129,56): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\xoidr\Desktop\SquareFighters2D\ClientSide\MainClientSide.cpp(129,43): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   NetworkClient.cpp
   UI.cpp
   Utils.cpp
   Generating code
   Previous IPDB not found, fall back to full compilation.
-  All 271 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 273 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   ClientSide.vcxproj -> C:\Users\xoidr\Desktop\SquareFighters2D\x64\Release\ClientSide.exe
   'pwsh.exe' is not recognized as an internal or external command,

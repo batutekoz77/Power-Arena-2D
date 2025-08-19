@@ -76,6 +76,21 @@ void NetworkManager::HandleReceive(ENetEvent& ev) {
     if (msg == "GETROOMS") {
         roomManager.SendRoomList(ev.peer);
     }
+    else if (msg.rfind("POWER ", 0) == 0) {
+        int power = std::stoi(msg.substr(6));
+        int roomId = roomManager.peerToRoom[ev.peer];
+        auto& room = roomManager.rooms[roomId];
+
+        if (room.players.find(ev.peer) != room.players.end()) {
+            room.players[ev.peer].power = power;
+            room.players[ev.peer].ghost = false;
+
+            std::cout << room.players[ev.peer].name
+                << " selected super power " << power << "\n";
+
+            roomManager.BroadcastRoomState(roomId, false);
+        }
+    }
     else if (msg.rfind("CREATE ", 0) == 0) {
         std::string playerName = msg.substr(7);
         std::string ipStr = GetIPFromPeer(ev.peer);
@@ -101,7 +116,8 @@ void NetworkManager::HandleReceive(ENetEvent& ev) {
             Player p;
             p.name = playerName;
             p.ip = ipStr;
-
+            p.power = 0;
+            p.ghost = true;
             room.players[ev.peer] = p;
 
             roomManager.rooms[roomManager.nextRoomId] = room;
@@ -135,6 +151,8 @@ void NetworkManager::HandleReceive(ENetEvent& ev) {
         } Player p; 
         p.name = playerName; 
         p.ip = GetIPFromPeer(ev.peer); 
+        p.power = 0;
+        p.ghost = true;
         r.players[ev.peer] = p; 
         roomManager.peerToRoom[ev.peer] = roomId; 
         
@@ -146,22 +164,24 @@ void NetworkManager::HandleReceive(ENetEvent& ev) {
             int roomId = roomManager.peerToRoom[ev.peer];
             auto& player = roomManager.rooms[roomId].players[ev.peer];
 
-            if (msg == "W") player.posY -= 4;
-            if (msg == "S") player.posY += 4;
-            if (msg == "A") player.posX -= 4;
-            if (msg == "D") player.posX += 4;
+            if (player.power != 0) {
+                if (msg == "W") player.posY -= 4;
+                if (msg == "S") player.posY += 4;
+                if (msg == "A") player.posX -= 4;
+                if (msg == "D") player.posX += 4;
 
-            float minX = 0.f;
-            float maxX = 900.f - 40.f;
-            float minY = 0.f;
-            float maxY = 650.f - 40.f;
+                float minX = 0.f;
+                float maxX = 900.f - 40.f;
+                float minY = 0.f;
+                float maxY = 650.f - 40.f;
 
-            if (player.posX < minX) player.posX = minX;
-            if (player.posX > maxX) player.posX = maxX;
-            if (player.posY < minY) player.posY = minY;
-            if (player.posY > maxY) player.posY = maxY;
+                if (player.posX < minX) player.posX = minX;
+                if (player.posX > maxX) player.posX = maxX;
+                if (player.posY < minY) player.posY = minY;
+                if (player.posY > maxY) player.posY = maxY;
 
-            roomManager.BroadcastRoomState(roomId, false);
+                roomManager.BroadcastRoomState(roomId, false);
+            }
         }
     }
 }

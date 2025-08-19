@@ -100,15 +100,74 @@ int main() {
             if (Button({ 680, 90, 160, 40 }, "Back")) state = ScreenState::MAIN_MENU;
         }
         else if (state == ScreenState::PLAYING) {
-            if (IsKeyDown(KEY_W)) net.Send("W", false);
-            if (IsKeyDown(KEY_S)) net.Send("S", false);
-            if (IsKeyDown(KEY_A)) net.Send("A", false);
-            if (IsKeyDown(KEY_D)) net.Send("D", false);
-
+            PlayerState* me = nullptr;
             for (auto& pl : players) {
-                Color col = (std::strcmp(pl.name, myName.c_str()) == 0) ? GREEN : RED;
-                DrawRectangle((int)pl.posX, (int)pl.posY, 40, 40, col);
-                DrawText(pl.name, (int)pl.posX, (int)pl.posY - 20, 14, BLACK);
+                if (std::strcmp(pl.name, myName.c_str()) == 0) {
+                    me = &pl;
+                    break;
+                }
+            }
+
+            if (me && me->power == 0) {
+                // Arka plan paneli
+                DrawRectangle(250, 80, 400, 300, Fade(RAYWHITE, 0.95f));
+                DrawRectangleLines(250, 80, 400, 300, DARKBROWN);
+
+                DrawText("Select Your Super Power", 270, 100, 24, DARKBROWN);
+                DrawText("Choose wisely, this will define your playstyle!", 270, 130, 16, GRAY);
+
+                Vector2 mousePos = GetMousePosition();
+
+                auto drawButton = [&](Rectangle rect, const char* label, const char* desc, int id, Color highlight) {
+                    bool hover = CheckCollisionPointRec(mousePos, rect);
+                    Color bg = hover ? highlight : LIGHTGRAY;
+
+                    DrawRectangleRec(rect, bg);
+                    DrawRectangleLinesEx(rect, 2, DARKBROWN);
+
+                    DrawText(label, rect.x + 10, rect.y + 8, 20, BLACK);
+                    DrawText(desc, rect.x + 10, rect.y + 30, 14, DARKGRAY);
+
+                    if (hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        std::string msg = "POWER " + std::to_string(id);
+                        net.Send(msg, true);
+                    }
+                };
+
+                drawButton({ 270, 160, 360, 50 }, "Extra Speed", "Increase movement speed permanently", 1, BLUE);
+                drawButton({ 270, 220, 360, 50 }, "Extra Ammo", "Gain larger ammo capacity", 2, ORANGE);
+                drawButton({ 270, 280, 360, 50 }, "Time Developer", "Shorter ability cooldowns", 3, PURPLE);
+                drawButton({ 270, 340, 360, 50 }, "Freezer", "Freeze all enemies for 1.5s", 4, PINK);
+            }
+            else {
+                if (IsKeyDown(KEY_W)) net.Send("W", false);
+                if (IsKeyDown(KEY_S)) net.Send("S", false);
+                if (IsKeyDown(KEY_A)) net.Send("A", false);
+                if (IsKeyDown(KEY_D)) net.Send("D", false);
+
+                for (auto& pl : players) {
+                    if (std::strcmp(pl.name, myName.c_str()) == 0) {
+                        DrawRectangle((int)pl.posX, (int)pl.posY, 40, 40, GREEN);
+                        DrawText(pl.name, (int)pl.posX, (int)pl.posY - 20, 14, BLACK);
+                    }
+                    else {
+                        Color col;
+
+                        if (pl.power == 0) {
+                            col = { 211, 211, 211, 180 }; // Ghost → light brown
+                            DrawRectangle((int)pl.posX, (int)pl.posY, 40, 40, col);
+                            continue;
+                        }
+                        else if (pl.power == 1) col = BLUE;      // Extra Speed
+                        else if (pl.power == 2) col = ORANGE;    // Extra Ammo
+                        else if (pl.power == 3) col = PURPLE;    // Time Developer
+                        else if (pl.power == 4) col = PINK;     // Freezer
+                        else col = RED;                          // fallback
+
+                        DrawRectangle((int)pl.posX, (int)pl.posY, 40, 40, col);
+                        DrawText(pl.name, (int)pl.posX, (int)pl.posY - 20, 14, BLACK);
+                    }
+                }
             }
 
             DrawFPS(10, 10);

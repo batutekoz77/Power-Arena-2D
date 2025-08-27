@@ -44,9 +44,9 @@ cd vcpkg
 
 ## Building the Game
 1. Open the project in **Visual Studio Community**  
-2. Build the solution (Ctrl + Shift + B)  
-3. Run the executables from `x64/Release`
-4. ServerSide.exe and then ClientSide.exe(s)
+2. Build the solution (`Ctrl + Shift + B`)  
+3. Run the executables from (`x64/Release`)
+4. `ServerSide.exe` and then `ClientSide.exe(s)`
 
 ## License
 This project is licensed under the **MIT License** – see the LICENSE file for details.  
